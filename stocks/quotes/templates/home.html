@@ -1,0 +1,175 @@
+{% extends 'base.html' %} 
+
+{% block content %}
+
+<div class="container text-start">
+    <div class="row align-items-top">
+      <div class="col-4">
+        <br></br>
+        <h1 style="font-size:60px">Welcome!</h1>
+        <h2 style="text-align:justify-char" class="fw-light">Build your own portfolio and get the latest information on your favorite stocks.
+        Get started today by searching for a stock!</h2>
+      </div>
+      <div class="col-8">
+        <img src="https://img.freepik.com/free-vector/revenue-concept-illustration_114360-2803.jpg?w=1060&t=st=1683255564~exp=1683256164~hmac=5dce6895bed0cfff03883954df0a2412bd13089c5d6fa3fc7e9e49ad860b07bd"
+        width="600" height="600" class="float-end">
+      </div>
+    </div>
+  </div>
+
+{% if ticker %}
+    {{ ticker }}
+{% endif %} 
+
+</table>
+<table class="table table-hover table-striped table-bordered">
+    <thead>
+        <tr class="table-dark">
+            <th scope="col">Metrics</th>
+            <th scope="col">Values</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if stock %}
+        <h1>{{ stock.shortName }}</h1>
+        {% for key,value in stock.items %}
+        <tr>
+            <td>{{ key }}</td>
+            <td>{{ value }}</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+<div id="tester" style="width:900px;height:450px;"></div>
+{% if history %}
+<div class="form-check form-check-inline">
+    <input onclick="displayRadioValue()"class="form-check-input" checked type="radio" name="plotChoices" id="inlineRadio1" value="ohlc">
+    <label class="form-check-label" for="inlineRadio1">OHLC Plot</label>
+</div>
+<div class="form-check form-check-inline">
+    <input onclick="displayRadioValue()" class="form-check-input" type="radio" name="plotChoices" id="inlineRadio2" value="candlestick">
+    <label class="form-check-label" for="inlineRadio2">Candlestick Plot</label>
+</div>
+
+
+<script data-date="{{ history.date }}" data-close="{{ history.close}}" data-high="{{ history.high}}" data-low="{{ history.low }}" data-open="{{ history.open }}">
+    
+    const data = document.currentScript.dataset;
+    console.log(data.date);
+    var dates = data.date.substring(2, data.date.length - 2).split("', '");
+    var highs = data.high.substring(1, data.high.length - 1).split(', ');
+    var lows = data.low.substring(1, data.low.length - 1).split(', ');
+    var closes = data.close.substring(1, data.close.length - 1).split(', ');
+    var opens = data.open.substring(1, data.open.length - 1).split(', ');
+    // console.log(dates);
+    
+    let ohlc_input =document.querySelector('#inlineRadio1')
+    let candlestick_input = document.querySelector('#inlineRadio2')
+    function plot(dates, highs, lows, closes, opens, type) {
+
+        console.log('plotting'+type)
+        var TESTER = document.getElementById('tester');
+
+        var trace1 = {
+
+            x: dates,
+
+            close: closes,
+
+            decreasing: { line: { color: '#7F7F7F' } },
+
+            high: highs,
+
+            increasing: { line: { color: '#17BECF' } },
+
+            line: { color: 'rgba(31,119,180,1)' },
+
+            low: lows,
+            open: opens,
+
+            type: type,
+            xaxis: 'x',
+            yaxis: 'y'
+        };
+
+        var graph_data = [trace1];
+
+        var layout = {
+            dragmode: 'zoom',
+            margin: {
+                r: 10,
+                t: 25,
+                b: 40,
+                l: 60
+            },
+            showlegend: false,
+            xaxis: {
+                autorange: true,
+                range:[dates[0], dates[dates.length - 1]],
+                rangeselector: {
+                    buttons: [
+                        {
+                            count: 1,
+                            label: '1m',
+                            step: 'month',
+                            stepmode: 'backward'
+                        },
+                        {
+                            count: 6,
+                            label: '6m',
+                            step: 'month',
+                            stepmode: 'backward'
+                        },
+                        {
+                            count: 1,
+                            label: '1y',
+                            step: 'year',
+                            stepmode: 'backward'
+                        },
+                        {
+                            count: 2,
+                            label: '2y',
+                            step: 'year',
+                            stepmode: 'backward'
+                        },
+                        {
+                            count: 5,
+                            label: '5y',
+                            step: 'year',
+                            stepmode: 'backward'
+                        },
+                        // { step: 'all' }
+                    ]
+                },
+                rangeslider: { range: [dates[0], dates[dates.length - 1]] },
+                title: 'Date',
+                type: 'date'
+            },
+            yaxis: {
+                autorange: true,
+                fixedrange: false,
+                type: 'linear'
+            }
+        };
+
+        Plotly.newPlot(TESTER, graph_data, layout);
+    }
+
+    function displayRadioValue() {
+            var ele = document.getElementsByName('plotChoices');
+
+            for (i = 0; i < ele.length; i++) {
+                if (ele[i].checked)
+                    console.log(ele[i].value);
+                    plot(dates, highs, lows, closes, opens, ele[i].value);
+                    
+            }
+        }
+    
+    
+    plot(dates, highs, lows, closes, opens, 'ohlc')
+</script>
+{% endif %}
+
+{% endblock %}
